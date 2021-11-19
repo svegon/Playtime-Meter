@@ -1,6 +1,5 @@
 package playtime.meter;
 
-import it.unimi.dsi.fastutil.ints.IntHash;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.stat.StatFormatter;
 import net.minecraft.stat.StatType;
@@ -21,11 +20,18 @@ public final class ClientStats {
     public static final Identifier AFK = register("afk_playtime");
     public static final Identifier SCREEN_TIME = register("screen_time");
 
+    private static Identifier register(Identifier id, StatFormatter formatter) {
+        Registry.register(PLAYTIME_STATS, id, id);
+        PLAYTIME.getOrCreateStat(id, formatter);
+        return id;
+    }
+
+    private static Identifier register(String id, StatFormatter formatter) {
+        return register(new Identifier("playtimer", id), formatter);
+    }
+
     private static Identifier register(String id) {
-        Identifier identifier = new Identifier("playtimer", id);
-        Registry.register(PLAYTIME_STATS, identifier, identifier);
-        PLAYTIME.getOrCreateStat(identifier, StatFormatter.TIME);
-        return identifier;
+        return register(id, StatFormatter.TIME);
     }
 
     private static <T> StatType<T> registerType(String id, Registry<T> registry) {

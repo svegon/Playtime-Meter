@@ -1,31 +1,35 @@
 package playtime.meter;
 
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.math.MathHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import playtime.meter.mixin.StatAccessor;
 import playtime.meter.util.JsonUtil;
 import playtime.meter.util.LongStatFormatter;
+import playtime.meter.util.OptionalUtil;
 import playtime.meter.util.events.KeyBindingPressUpdate;
+import playtime.meter.util.events.ScreenKeyPressEvent;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,7 +38,11 @@ import java.util.Optional;
  * than {@code Integer.MAX_VALUE}
  */
 public final class PlaytimeMeter implements ClientTickEvents.EndTick, ClientLifecycleEvents.ClientStopping,
-        KeyBindingPressUpdate {
+        KeyBindingPressUpdate, ScreenKeyPressEvent {
+    public static final Logger LOGGER = LogManager.getLogger("playtime-meter");
+    public static final Path MOD_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("Playtime Meter");
+    static PlaytimeMeter playtimeMeter;
+
     private int aFKTimeout = 600;
 
     private final Object2LongMap<Stat<Identifier>> playtimeMap =
@@ -66,8 +74,8 @@ public final class PlaytimeMeter implements ClientTickEvents.EndTick, ClientLife
         return playtimeMap.getLong(stat);
     }
 
-    public void setAFKTimeout(int timeout) {
-        aFKTimeout = MathHelper.clamp(timeout, 0, 6000);
+    public int setAFKTimeout(int timeout) {
+        return aFKTimeout = Math.max(timeout, 0);
     }
 
     public int getAFKTimeout() {
@@ -81,26 +89,34 @@ public final class PlaytimeMeter implements ClientTickEvents.EndTick, ClientLife
 
     public void load() {
         try {
-            Optional<JsonObject> json = JsonUtil.parseFileToObject(Main.MOD_DIRECTORY.resolve("save.json"));
+            Optional<JsonObject> optional = JsonUtil.parseFileToObject(MOD_DIRECTORY.resolve("playtimes.json"));
 
-            if (json.isEmpty()) {
-                Main.LOGGER.error("The save file is not a json object.");
+            if (optional.isEmpty()) {
+                LOGGER.error("The playtimes file is not a json object.");
             } else {
-                try {
-                    for (Map.Entry<String, JsonElement> entry : json.get().entrySet()) {
-                        playtimeMap.put(ClientStats.PLAYTIME.getOrCreateStat(new Identifier(entry.getKey())),
-                                JsonUtil.getAsLong(entry.getValue()).orElse(0));
-                    }
-                } catch (InvalidIdentifierException e) {
-                    e.printStackTrace();
-                }
+                JsonObject json = optional.get();
 
-                setAFKTimeout(JsonUtil.getAsInt(json.get().get("afk_timeout")).orElse(600));
+                for (Identifier stat : ClientStats.PLAYTIME_STATS) {
+                    playtimeMap.put(ClientStats.PLAYTIME.getOrCreateStat(stat), OptionalUtil.flatMapToInt(
+                            JsonUtil.getProperty(json, stat.toString()), JsonUtil::getAsInt).orElse(0));
+                }
+            }
+
+            Optional<JsonObject> optionalSettings =
+                    JsonUtil.parseFileToObject(MOD_DIRECTORY.resolve("settings.json"));
+
+            if (optionalSettings.isPresent()) {
+                JsonObject settingsJson = optionalSettings.get();
+
+                setAFKTimeout(OptionalUtil.flatMapToInt(JsonUtil.getProperty(settingsJson, "AFK_timeout"),
+                        JsonUtil::getAsInt).orElse(getAFKTimeout()));
+            } else {
+                LOGGER.error("The settings file is not a json object.");
             }
         } catch (NoSuchFileException ignored) {
             // Seems it's the first time loading the mod. We'll just generate the file for next time.
-        } catch (IOException e) {
-            Main.LOGGER.error("Couldn't load playtime stats due to the following error:");
+        } catch (IOException | JsonParseException e) {
+            LOGGER.error("Couldn't load playtime stats due to the following error:");
             e.printStackTrace();
         }
 
@@ -108,18 +124,20 @@ public final class PlaytimeMeter implements ClientTickEvents.EndTick, ClientLife
     }
 
     public void save() {
-        JsonObject json = new JsonObject();
+        JsonObject settings = new JsonObject();
+        JsonObject playtimes = new JsonObject();
 
         for (Object2LongMap.Entry<Stat<Identifier>> entry : playtimeMap.object2LongEntrySet()) {
-            json.addProperty(entry.getKey().getValue().toString(), entry.getLongValue());
+            playtimes.addProperty(entry.getKey().getValue().toString(), entry.getLongValue());
         }
 
-        json.addProperty("afk_timeout", getAFKTimeout());
+        settings.addProperty("AFK_timeout", getAFKTimeout());
 
         try {
-            JsonUtil.saveToFile(json, Main.MOD_DIRECTORY.resolve("save.json"));
+            JsonUtil.saveToFile(playtimes, MOD_DIRECTORY.resolve("playtimes.json"));
+            JsonUtil.saveToFile(playtimes, MOD_DIRECTORY.resolve("settings.json"));
         } catch (IOException e) {
-            Main.LOGGER.error("Couldn't save playtime stats due to the following error:");
+            LOGGER.error("Couldn't save playtime stats due to the following error:");
             e.printStackTrace();
         }
     }
@@ -129,13 +147,18 @@ public final class PlaytimeMeter implements ClientTickEvents.EndTick, ClientLife
         increaseStat(minecraftClient.player, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.TOTAL), 1);
 
         if (minecraftClient.player == null || (minecraftClient.currentScreen != null
-                && minecraftClient.currentScreen.isPauseScreen())) {
-            increaseStat(null, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.SCREEN_TIME), 1);
-        } else if (getAFKTimeout() > 0 && afkTicks >= getAFKTimeout()) {
-            increaseStat(minecraftClient.player, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.AFK), 1);
+                && minecraftClient.currentScreen.isPauseScreen() && minecraftClient.isInSingleplayer())) {
+            increaseStat(minecraftClient.player, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.SCREEN_TIME),
+                    1);
+        } else if (getAFKTimeout() > 0) {
+            if (afkTicks >= getAFKTimeout()) {
+                increaseStat(minecraftClient.player, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.AFK), 1);
+            } else {
+                increaseStat(minecraftClient.player, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.ACTIVE), 1);
+                afkTicks++;
+            }
         } else {
             increaseStat(minecraftClient.player, ClientStats.PLAYTIME.getOrCreateStat(ClientStats.ACTIVE), 1);
-            afkTicks++;
         }
     }
 
@@ -147,5 +170,16 @@ public final class PlaytimeMeter implements ClientTickEvents.EndTick, ClientLife
     @Override
     public void onKeyBindingPressUpdate(KeyBinding keyBinding, boolean pressed, CallbackInfo info) {
         afkTicks = 0;
+    }
+
+    @Override
+    public void onScreenKeyPress(int key, int scanCode, int modifiers, boolean action) {
+        if (action) {
+            afkTicks = 0;
+        }
+    }
+
+    public static PlaytimeMeter getInstance() {
+        return playtimeMeter;
     }
 }

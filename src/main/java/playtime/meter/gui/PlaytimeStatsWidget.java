@@ -1,5 +1,7 @@
 package playtime.meter.gui;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.StatsScreen;
@@ -12,10 +14,11 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import playtime.meter.ClientStats;
-import playtime.meter.Main;
+import playtime.meter.PlaytimeMeter;
 
 import java.util.Comparator;
 
+@Environment(EnvType.CLIENT)
 public class PlaytimeStatsWidget extends AlwaysSelectedEntryListWidget<PlaytimeStatsWidget.Entry> {
     private final StatsScreen parent;
 
@@ -64,7 +67,7 @@ public class PlaytimeStatsWidget extends AlwaysSelectedEntryListWidget<PlaytimeS
         }
 
         private String getFormatted() {
-            return Main.getPlaytimeMeter().format(stat);
+            return PlaytimeMeter.getInstance().format(stat);
         }
     }
 }
