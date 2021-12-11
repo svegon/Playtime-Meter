@@ -103,9 +103,11 @@ final @NotNull Consumer<Exception> exceptionHandler) {
                 continue;
             }
 
-            if (!ClientStats.PLAYTIME_STATS.containsId(identifier)) {
+            identifier = ClientStats.PLAYTIME_STATS.get(identifier);
+
+            if (identifier == null) {
                 exceptionHandler.accept(new InvalidIdentifierException("Invalid client stat identifier: "
-                        + identifier));
+                        + entry.getKey()));
                 continue;
             }
 
@@ -133,11 +135,11 @@ final @NotNull Consumer<Exception> exceptionHandler) {
                 continue;
             }
 
-            identifier = statIdMapping.getOrDefault(identifier, identifier);
+            identifier = ClientStats.PLAYTIME_STATS.get(statIdMapping.getOrDefault(identifier, identifier));
 
-            if (!ClientStats.PLAYTIME_STATS.containsId(identifier)) {
+            if (identifier == null) {
                 exceptionHandler.accept(new InvalidIdentifierException("Invalid client stat identifier: "
-                        + identifier));
+                        + entry.getKey()));
                 continue;
             }
 

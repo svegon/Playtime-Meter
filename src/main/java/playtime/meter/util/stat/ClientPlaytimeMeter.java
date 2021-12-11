@@ -3,13 +3,11 @@ package playtime.meter.util.stat;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,8 +32,7 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public final class ClientPlaytimeMeter extends PlaytimeMeter
         implements ClientTickEvents.EndTick, KeyBindingPressUpdate {
-    private final Object2LongMap<Stat<Identifier>> playtimeMap =
-            Object2LongMaps.synchronize(new Object2LongOpenHashMap<>());
+    private final Object2LongMap<Stat<Identifier>> playtimeMap = new Object2LongOpenHashMap<>();
 
     private int aFKTimeout = getDefaultAFKTimeout();
     private int afkTicks;
