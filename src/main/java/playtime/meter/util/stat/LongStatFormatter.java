@@ -1,4 +1,4 @@
-package playtime.meter.util;
+package playtime.meter.util.stat;
 
 import net.minecraft.stat.StatFormatter;
 

@@ -7,8 +7,6 @@
   ],
   "client": [
     "KeyBindingMixin",
-    "KeyboardMixin",
-    "MouseMixin",
     "StatAccessor",
     "StatsScreenMixin"
   ],

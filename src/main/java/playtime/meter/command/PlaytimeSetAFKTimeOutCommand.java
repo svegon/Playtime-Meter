@@ -6,8 +6,7 @@ import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.text.TranslatableText;
-import playtime.meter.PlaytimeMeter;
-import playtime.meter.util.LongStatFormatter;
+import playtime.meter.Main;
 
 public final class PlaytimeSetAFKTimeOutCommand {
     private PlaytimeSetAFKTimeOutCommand() {
@@ -15,18 +14,17 @@ public final class PlaytimeSetAFKTimeOutCommand {
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(ClientCommandManager.literal("playtime.setafktimeout")
+        dispatcher.register(ClientCommandManager.literal("playtime:setafktimeout")
                 .then(ClientCommandManager.argument("ticks", TimeArgumentType.time()).executes(context -> {
-                    int ticks = PlaytimeMeter.getInstance().setAFKTimeout(IntegerArgumentType.getInteger(context,
-                            "ticks"));
+                    int ticks = Math.min(IntegerArgumentType.getInteger(context, "ticks"), 6000);
+                    int prev = Main.getPlaytimeMeter().setAFKTimeout(context.getSource().getPlayer(), ticks);
 
                     if (ticks > 0) {
                         context.getSource().sendFeedback(new TranslatableText(
-                                "playtimer.playtime.setafktimeout.timeoutSet",
-                                LongStatFormatter.TIME.format(ticks)));
+                                "command.playtimer.setafktimeout.timeoutSet", ticks, prev));
                     } else {
                         context.getSource().sendFeedback(new TranslatableText(
-                                "playtimer.playtime.setafktimeout.timeoutDisabled"));
+                                "command.playtimer.setafktimeout.timeoutDisabled"));
                     }
 
                     return ticks;

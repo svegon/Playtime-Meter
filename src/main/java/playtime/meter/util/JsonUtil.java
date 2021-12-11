@@ -23,15 +23,14 @@ public class JsonUtil {
 
     public static JsonElement parseFile(Path path) throws IOException, JsonParseException {
         try(BufferedReader reader = Files.newBufferedReader(path)) {
-            return new JsonParser().parse(reader);
+            return JsonParser.parseReader(reader);
         }
     }
 
     public static JsonElement parseURL(String url) throws IOException, JsonParseException {
         try(InputStream input = URI.create(url).toURL().openStream()) {
             InputStreamReader reader = new InputStreamReader(input);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-            return new JsonParser().parse(bufferedReader);
+            return JsonParser.parseReader(new BufferedReader(reader));
         }
     }
 
@@ -64,6 +63,8 @@ public class JsonUtil {
     }
 
     public static void saveToFile(JsonElement json, Path path) throws IOException {
+        Files.createDirectories(path.getParent());
+
         try(BufferedWriter writer = Files.newBufferedWriter(path)) {
             PRETTY_GSON.toJson(json, writer);
         }
@@ -95,9 +96,7 @@ public class JsonUtil {
 
     public static OptionalInt getAsInt(JsonElement json) {
         if (json.isJsonPrimitive()) {
-            JsonPrimitive primitive = json.getAsJsonPrimitive();
-
-            if (primitive.isNumber()) {
+            if (json.getAsJsonPrimitive().isNumber()) {
                 return OptionalInt.of(json.getAsInt());
             }
         }

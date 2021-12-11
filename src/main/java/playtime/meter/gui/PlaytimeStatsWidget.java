@@ -1,7 +1,5 @@
 package playtime.meter.gui;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.StatsScreen;
@@ -14,11 +12,10 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import playtime.meter.ClientStats;
-import playtime.meter.PlaytimeMeter;
+import playtime.meter.Main;
 
 import java.util.Comparator;
 
-@Environment(EnvType.CLIENT)
 public class PlaytimeStatsWidget extends AlwaysSelectedEntryListWidget<PlaytimeStatsWidget.Entry> {
     private final StatsScreen parent;
 
@@ -59,15 +56,15 @@ public class PlaytimeStatsWidget extends AlwaysSelectedEntryListWidget<PlaytimeS
         @Override
         public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX,
                            int mouseY, boolean hovered, float tickDelta) {
-            DrawableHelper.drawTextWithShadow(matrices, client.textRenderer, displayText, x + 2, y + 1,
+            DrawableHelper.drawTextWithShadow(matrices, client.textRenderer, displayText, x - 98, y + 1,
                     index % 2 == 0 ? 16777215 : 9474192);
             String string = this.getFormatted();
-            DrawableHelper.drawStringWithShadow(matrices, client.textRenderer, string, x + 2 + 213
+            DrawableHelper.drawStringWithShadow(matrices, client.textRenderer, string, x + 315
                     - client.textRenderer.getWidth(string), y + 1, index % 2 == 0 ? 16777215 : 9474192);
         }
 
-        private String getFormatted() {
-            return PlaytimeMeter.getInstance().format(stat);
+        public String getFormatted() {
+            return Main.getPlaytimeMeter().format(client.player, stat);
         }
     }
 }
