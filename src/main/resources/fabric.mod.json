@@ -9,7 +9,9 @@
     "Svegon"
   ],
   "contact": {
-    "sources": "https://github.com/svegon/Playtime-Meter"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/playtime-meter",
+    "sources": "https://github.com/svegon/Playtime-Meter",
+    "issues": "https://github.com/svegon/Playtime-Meter/issues"
   },
 
   "license": "CC0-1.0",
@@ -23,6 +25,8 @@
       "${group}.Main"
     ], "server": [
       "${group}.Main"
+    ], "preLaunch": [
+      "${group}.Main"
     ]
   },
   "mixins": [
@@ -31,8 +35,12 @@
 
   "depends": {
     "fabricloader": ">=${loader_version}",
-    "fabric": "${fabric_version}",
-    "minecraft": ">=${minecraft_version}",
+    "fabric": ">=${min_fabric_version}",
+    "minecraft": ["1.16.x",
+      "1.17.x",
+      "1.18.x",
+      ">=${minecraft_version}"
+    ],
     "java": ">=${java_version_short}"
   },
   "suggests": {

@@ -10,7 +10,18 @@
   "stat_type.playtimer.playtime": "Playtime",
   "stat.playtimeButton": "Playtime",
   "stat.playtimer.total_time_played": "Total Time Spent in Game",
-  "stat.playtimer.active_playtime": "Time Spent Actually Playing the Game",
   "stat.playtimer.afk_playtime": "Time Spent AFK",
-  "stat.playtimer.screen_time": "Time Spent Without Being in a Game"
+  "stat.playtimer.active_playtime": "Time Spent Actually Playing the Game",
+  "stat.playtimer.walk_time": "Time Spent Walking",
+  "stat.playtimer.stand_time": "Time Spent Standing",
+  "stat.playtimer.fall_time": "Time Spent Falling",
+  "stat.playtimer.mine_time": "Time Spent Mining",
+  "stat.playtimer.build_time": "Time Spent Building",
+  "stat.playtimer.craft_time": "Time Spent Crafting",
+  "stat.playtimer.fight_time": "Time Spent Fighting",
+  "stat.playtimer.screen_time": "Time Spent Without Being in a Game",
+  "stat.playtimer.title_screen_time": "Chilling in the title screen",
+  "stat.playtimer.world_screen_time": "Time Spent Listing or Creating Worlds",
+  "stat.playtimer.loading_screen_time": "Time Spent Waiting for Minecraft",
+  "stat.playtimer.pause_screen_time": "Time the Game Was Paused"
 }

@@ -37,7 +37,7 @@ public final class FileArgumentType implements ArgumentType<Path> {
 
     @Override
     public Path parse(StringReader reader) throws CommandSyntaxException {
-        final String s = reader.readString().replace("\\", "/");
+        final String s = reader.readString().replaceAll("\\\\", "/");
 
         if (s.length() < 2) {
             return directory;

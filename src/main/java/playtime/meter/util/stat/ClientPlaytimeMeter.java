@@ -8,18 +8,28 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.*;
+import net.minecraft.client.gui.screen.ingame.CraftingScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.realms.gui.screen.RealmsDownloadLatestWorldScreen;
+import net.minecraft.client.realms.gui.screen.RealmsUploadScreen;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.StatType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.ClassWriter;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import playtime.meter.ClientStats;
 import playtime.meter.Main;
+import playtime.meter.mixin.ClientPlayerInteractionManagerAccessor;
+import playtime.meter.mixin.MinecraftClientAccessor;
 import playtime.meter.util.JsonUtil;
 import playtime.meter.util.StatParser;
 import playtime.meter.util.events.KeyBindingPressUpdate;
@@ -28,6 +38,7 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public final class ClientPlaytimeMeter extends PlaytimeMeter
@@ -129,17 +140,68 @@ public final class ClientPlaytimeMeter extends PlaytimeMeter
     @Override
     public void onEndTick(MinecraftClient minecraftClient) {
         ClientPlayerEntity player = minecraftClient.player;
+        Screen screen = minecraftClient.currentScreen;
 
         increaseStat(player, ClientStats.TOTAL, 1);
 
-        if (player == null || (minecraftClient.currentScreen != null
-                && minecraftClient.currentScreen.isPauseScreen())) {
-            increaseStat(null, ClientStats.SCREEN_TIME, 1);
-        } else if (getAFKTimeout(MinecraftClient.getInstance().player) > 0 && afkTicks >= getAFKTimeout(player)) {
+        if (player == null || (screen != null
+                && screen.isPauseScreen() && minecraftClient.isInSingleplayer())) {
+            increaseStat(player, ClientStats.SCREEN_TIME, 1);
+
+            if (screen instanceof TitleScreen) {
+                increaseStat(player, ClientStats.TITLE_SCREEN_TIME, 1);
+            } else if (screen instanceof LevelLoadingScreen || screen instanceof DownloadingTerrainScreen
+                    || screen instanceof ProgressScreen || screen instanceof ConnectScreen
+                    || screen instanceof RealmsDownloadLatestWorldScreen || screen instanceof RealmsUploadScreen) {
+                increaseStat(player, ClientStats.LOADING_SCREEN_TIME, 1);
+            } else if (player == null) {
+                increaseStat(null, ClientStats.WORLD_SCREEN_TIME, 1);
+            } else {
+                increaseStat(player, ClientStats.PAUSE_SCREEN_TIME, 1);
+            }
+                /* else if (screen instanceof SelectWorldScreen || screen instanceof DirectConnectScreen
+                    || screen instanceof PackScreen || screen instanceof OutOfMemoryScreen
+                    || screen instanceof PresetsScreen || screen instanceof DisconnectedScreen
+                    || screen instanceof OptimizeWorldScreen || screen instanceof EditWorldScreen
+                    || screen instanceof NoticeScreen || screen instanceof LevelLoadingScreen
+                    || screen instanceof MultiplayerWarningScreen || screen instanceof ProgressScreen
+                    || screen instanceof CustomizeBuffetLevelScreen || screen instanceof EditGameRulesScreen
+                    || screen instanceof AddServerScreen || screen instanceof DownloadingTerrainScreen) {
+                increaseStat(player, ClientStats.WORLD_SCREEN_TIME, 1);
+            }*/
+        } else if (getAFKTimeout(player) > 0 && afkTicks >= getAFKTimeout(player)) {
             increaseStat(player, ClientStats.AFK, 1);
         } else {
-            increaseStat(player, ClientStats.ACTIVE, 1);
             afkTicks++;
+            increaseStat(player, ClientStats.ACTIVE, 1);
+
+            if (isMovementkeyPressed(minecraftClient)) {
+                increaseStat(player, ClientStats.WALKING_TIME, 1);
+            } else {
+                increaseStat(player, ClientStats.STANDING_TIME, 1);
+            }
+
+            if (player.getVelocity().getY() < 0) {
+                increaseStat(player, ClientStats.FALLING_TIME, 1);
+            }
+
+            if (((ClientPlayerInteractionManagerAccessor) minecraftClient.interactionManager)
+                    .getCurrentBreakingProgress() == 0) {
+                increaseStat(player, ClientStats.MINING_TIME, 1);
+            }
+
+            if (((MinecraftClientAccessor) minecraftClient).getItemUseCooldown() > 0) {
+                increaseStat(player, ClientStats.BUILDING_TIME, 1);
+            }
+
+            if (screen instanceof CraftingScreen || (screen instanceof InventoryScreen
+                    && isCrafting(player.playerScreenHandler))) {
+                increaseStat(player, ClientStats.CRAFTING_TIME, 1);
+            }
+
+            if (player.getAttackCooldownProgress(0) < 1) {
+                increaseStat(player, ClientStats.FIGHTING_TIME, 1);
+            }
         }
     }
 
@@ -150,5 +212,22 @@ public final class ClientPlaytimeMeter extends PlaytimeMeter
 
     public static int getDefaultAFKTimeout() {
         return 600;
+    }
+
+    private static boolean isMovementkeyPressed(MinecraftClient client) {
+        GameOptions options = client.options;
+
+        return Stream.of(options.keyForward, options.keyBack, options.keyLeft, options.keyRight, options.keyJump)
+                .anyMatch(KeyBinding::isPressed);
+    }
+
+    private static boolean isCrafting(PlayerScreenHandler handler) {
+        for (int i = 1; i < 5; i++) {
+            if (!handler.slots.get(i).getStack().isEmpty()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

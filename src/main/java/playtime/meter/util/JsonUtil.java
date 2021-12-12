@@ -1,6 +1,7 @@
 package playtime.meter.util;
 
 import com.google.gson.*;
+import playtime.meter.util.versioned.VersionedReferences;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -23,14 +24,14 @@ public class JsonUtil {
 
     public static JsonElement parseFile(Path path) throws IOException, JsonParseException {
         try(BufferedReader reader = Files.newBufferedReader(path)) {
-            return JsonParser.parseReader(reader);
+            return VersionedReferences.parseReader2Json(reader);
         }
     }
 
     public static JsonElement parseURL(String url) throws IOException, JsonParseException {
         try(InputStream input = URI.create(url).toURL().openStream()) {
             InputStreamReader reader = new InputStreamReader(input);
-            return JsonParser.parseReader(new BufferedReader(reader));
+            return VersionedReferences.parseReader2Json(new BufferedReader(reader));
         }
     }
 

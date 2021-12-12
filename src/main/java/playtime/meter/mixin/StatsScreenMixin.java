@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import playtime.meter.gui.PlaytimeStatsWidget;
+import playtime.meter.util.versioned.VersionedReferences;
 
 @Mixin(StatsScreen.class)
 public abstract class StatsScreenMixin extends Screen implements StatsListener {
@@ -33,8 +34,8 @@ public abstract class StatsScreenMixin extends Screen implements StatsListener {
 
     @Inject(method = {"createButtons"}, at = {@At("TAIL")})
     private void onCreateButtons(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(width / 2 + 80, height - 52, 80, 20,
-                new TranslatableText("stat.playtimeButton"), (button) -> selectStatList(playtime)));
+        VersionedReferences.addDrawableChild(this, new ButtonWidget(width / 2 + 80, height - 52, 80,
+                20, new TranslatableText("stat.playtimeButton"), (button) -> selectStatList(playtime)));
     }
 
     @ModifyArg(method = {"createButtons"}, at = @At(value = "INVOKE",

@@ -1,5 +1,6 @@
 buildscript {
 	ext.minecraftVersion = project.minecraft_version_1_18
+	ext.minFabric = fabric_version_1_16
 	ext.javaVersionShort = 17
 
 	if (minecraftVersion.startsWith("1.14")) {
@@ -64,6 +65,7 @@ processResources {
 		"minecraft_version": project.minecraftVersion,
 		"loader_version": project.loader_version,
 		"fabric_version": project.fabricAPI,
+		"min_fabric_version": project.minFabric,
 		"source_version": project.sourceCompatibility,
 		"java_version": project.targetCompatibility,
 		"java_version_short": project.javaVersionShort
@@ -71,7 +73,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = javaVersionShort
+	it.options.release = project.javaVersionShort
 }
 
 java {

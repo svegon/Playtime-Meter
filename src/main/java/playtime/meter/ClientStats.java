@@ -15,10 +15,24 @@ public final class ClientStats {
     public static final Registry<Identifier> PLAYTIME_STATS = FabricRegistryBuilder.createSimple(Identifier.class,
                     Main.modIdentifier("playtime_stats")).buildAndRegister();
     public static final StatType<Identifier> PLAYTIME = registerType("playtime", PLAYTIME_STATS);
+
     public static final Stat<Identifier> TOTAL = register("total_time_played");
-    public static final Stat<Identifier> ACTIVE = register("active_playtime");
     public static final Stat<Identifier> AFK = register("afk_playtime");
+
+    public static final Stat<Identifier> ACTIVE = register("active_playtime");
+    public static final Stat<Identifier> WALKING_TIME = register("walk_time");
+    public static final Stat<Identifier> STANDING_TIME = register("stand_time");
+    public static final Stat<Identifier> FALLING_TIME = register("fall_time");
+    public static final Stat<Identifier> MINING_TIME = register("mine_time");
+    public static final Stat<Identifier> BUILDING_TIME = register("build_time");
+    public static final Stat<Identifier> CRAFTING_TIME = register("craft_time");
+    public static final Stat<Identifier> FIGHTING_TIME = register("fight_time");
+
     public static final Stat<Identifier> SCREEN_TIME = register("screen_time");
+    public static final Stat<Identifier> TITLE_SCREEN_TIME = register("title_screen_time");
+    public static final Stat<Identifier> WORLD_SCREEN_TIME = register("world_screen_time");
+    public static final Stat<Identifier> LOADING_SCREEN_TIME = register("loading_screen_time");
+    public static final Stat<Identifier> PAUSE_SCREEN_TIME = register("pause_screen_time");
 
     private static Stat<Identifier> register(String id) {
         Identifier identifier = Main.modIdentifier(id);
