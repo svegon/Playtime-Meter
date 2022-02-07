@@ -11,7 +11,8 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import playtime.meter.ClientStats;
+import playtime.meter.ClientMain;
+import playtime.meter.PlaytimeStats;
 import playtime.meter.Main;
 
 import java.util.Comparator;
@@ -23,7 +24,7 @@ public class PlaytimeStatsWidget extends AlwaysSelectedEntryListWidget<PlaytimeS
         super(minecraftClient, parent.width, parent.height, 32, parent.height - 64, 10);
         this.parent = parent;
 
-        for (Stat<Identifier> stat : ClientStats.PLAYTIME) {
+        for (Stat<Identifier> stat : PlaytimeStats.PLAYTIME) {
             addEntry(new PlaytimeStatsWidget.Entry(stat));
         }
 
@@ -64,7 +65,7 @@ public class PlaytimeStatsWidget extends AlwaysSelectedEntryListWidget<PlaytimeS
         }
 
         public String getFormatted() {
-            return Main.getPlaytimeMeter().format(client.player, stat);
+            return ClientMain.getPlaytimeMeter().format(stat);
         }
     }
 }

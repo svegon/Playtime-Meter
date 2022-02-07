@@ -4,6 +4,10 @@
   "package": "playtime.meter.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "PlayerManagerMixin",
+    "ServerPlayerEntityMixin",
+    "ServerPlayerInteractionManagerAccessor",
+    "ServerPlayNetworkHandlerMixin"
   ],
   "client": [
     "ClientPlayerInteractionManagerAccessor",

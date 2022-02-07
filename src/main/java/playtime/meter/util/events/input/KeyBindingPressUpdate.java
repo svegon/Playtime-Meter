@@ -1,4 +1,4 @@
-package playtime.meter.util.events;
+package playtime.meter.util.events.input;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

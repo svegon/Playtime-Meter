@@ -17,7 +17,7 @@ public final class VersionedReferences {
     private static final Gson GSON;
     private static final ScreenReferences SCREEN;   
 
-    public static void initVersionedMixins() {
+    public static void init() {
         // currently, none are necessary
     }
 

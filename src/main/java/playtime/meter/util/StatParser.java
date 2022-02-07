@@ -10,7 +10,7 @@ import net.minecraft.stat.Stat;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import org.jetbrains.annotations.NotNull;
-import playtime.meter.ClientStats;
+import playtime.meter.PlaytimeStats;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
@@ -28,8 +28,8 @@ public final class StatParser {
     private static final Int2ObjectMap<Object2ObjectMap<Identifier, Identifier>> OLD_MAPPINGS =
             new Int2ObjectOpenHashMap<>();
 
-    public static Object2LongMap<Stat<Identifier>> parsePlaytimesFileClient(final @NotNull Path file,
-final @NotNull Consumer<Exception> exceptionHandler) {
+    public static Object2LongMap<Stat<Identifier>> parsePlaytimesFile(final @NotNull Path file,
+                                                                      final @NotNull Consumer<Exception> exceptionHandler) {
         try {
             Optional<JsonObject> playtimes = JsonUtil.parseFileToObject(file);
 
@@ -45,9 +45,9 @@ final @NotNull Consumer<Exception> exceptionHandler) {
 
                 switch (dataVersion) {
                     case 0:
-                        return parsePlaytimesJson(data, exceptionHandler);
+                        return parsePlaytimesJson0(data, exceptionHandler);
                     default:
-                        break;
+                        exceptionHandler.accept(new JsonParseException("Invalid playtime stats data version."));
                 }
             }
         } catch (NoSuchFileException e) {
@@ -88,8 +88,8 @@ final @NotNull Consumer<Exception> exceptionHandler) {
         return json;
     }
 
-    public static Object2LongMap<Stat<Identifier>> parsePlaytimesJson(@NotNull JsonObject playtimes,
-                                                                      final @NotNull Consumer<Exception>
+    public static Object2LongMap<Stat<Identifier>> parsePlaytimesJson0(@NotNull JsonObject playtimes,
+                                                                       final @NotNull Consumer<Exception>
                                                                                exceptionHandler) {
         Object2LongMap<Stat<Identifier>> playtimeMap = new Object2LongOpenHashMap<>();
 
@@ -103,7 +103,7 @@ final @NotNull Consumer<Exception> exceptionHandler) {
                 continue;
             }
 
-            identifier = ClientStats.PLAYTIME_STATS.get(identifier);
+            identifier = PlaytimeStats.PLAYTIME_STATS.get(identifier);
 
             if (identifier == null) {
                 exceptionHandler.accept(new InvalidIdentifierException("Invalid client stat identifier: "
@@ -111,7 +111,7 @@ final @NotNull Consumer<Exception> exceptionHandler) {
                 continue;
             }
 
-            playtimeMap.put(ClientStats.PLAYTIME.getOrCreateStat(identifier),
+            playtimeMap.put(PlaytimeStats.PLAYTIME.getOrCreateStat(identifier),
                     JsonUtil.getAsLong(entry.getValue()).orElse(0));
         }
 
@@ -135,7 +135,7 @@ final @NotNull Consumer<Exception> exceptionHandler) {
                 continue;
             }
 
-            identifier = ClientStats.PLAYTIME_STATS.get(statIdMapping.getOrDefault(identifier, identifier));
+            identifier = PlaytimeStats.PLAYTIME_STATS.get(statIdMapping.getOrDefault(identifier, identifier));
 
             if (identifier == null) {
                 exceptionHandler.accept(new InvalidIdentifierException("Invalid client stat identifier: "
@@ -143,7 +143,7 @@ final @NotNull Consumer<Exception> exceptionHandler) {
                 continue;
             }
 
-            playtimeMap.put(ClientStats.PLAYTIME.getOrCreateStat(identifier),
+            playtimeMap.put(PlaytimeStats.PLAYTIME.getOrCreateStat(identifier),
                     JsonUtil.getAsLong(entry.getValue()).orElse(0));
         }
 

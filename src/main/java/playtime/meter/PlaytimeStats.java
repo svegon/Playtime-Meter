@@ -7,8 +7,8 @@ import net.minecraft.stat.StatType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-public final class ClientStats {
-    private ClientStats() {
+public final class PlaytimeStats {
+    private PlaytimeStats() {
         throw new AssertionError();
     }
 
@@ -34,10 +34,14 @@ public final class ClientStats {
     public static final Stat<Identifier> LOADING_SCREEN_TIME = register("loading_screen_time");
     public static final Stat<Identifier> PAUSE_SCREEN_TIME = register("pause_screen_time");
 
-    private static Stat<Identifier> register(String id) {
+    private static Stat<Identifier> register(String id, StatFormatter formatter) {
         Identifier identifier = Main.modIdentifier(id);
         Registry.register(PLAYTIME_STATS, identifier, identifier);
-        return PLAYTIME.getOrCreateStat(identifier, StatFormatter.TIME);
+        return PLAYTIME.getOrCreateStat(identifier, formatter);
+    }
+
+    private static Stat<Identifier> register(String id) {
+        return register(id, StatFormatter.TIME);
     }
 
     private static <T> StatType<T> registerType(String id, Registry<T> registry) {

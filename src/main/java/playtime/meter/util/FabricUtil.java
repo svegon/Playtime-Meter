@@ -65,9 +65,9 @@ public final class FabricUtil {
                 }
             }
 
-            boolean finalLess = less;
-            boolean finalGreater = greater;
-            boolean finalEqual = equal;
+            final boolean finalLess = less;
+            final boolean finalGreater = greater;
+            final boolean finalEqual = equal;
             final Version version1;
 
             try {

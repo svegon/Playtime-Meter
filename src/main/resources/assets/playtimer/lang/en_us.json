@@ -1,5 +1,7 @@
 {
-  "command.playtimer.setafktimeout.timeoutSet": "Timeout has be set to %s. (The previous value was %s.",
+  "command.playtimer.serverafktimeout.timeoutSet": "AFK timeout has be set to %s. (The previous value was %s.)",
+  "command.playtimer.serverafktimeout.timeoutDisabled": "AFK timeout has been disabled.",
+  "command.playtimer.setafktimeout.timeoutSet": "Timeout has be set to %s. (The previous value was %s.)",
   "command.playtimer.setafktimeout.timeoutDisabled": "Timeout has been disabled.",
   "command.playtimer.savefolder.get.successful": "The current save folder is %s.",
   "command.playtimer.savefolder.set.successful": "The current save folder has been changed from %s to %s.",

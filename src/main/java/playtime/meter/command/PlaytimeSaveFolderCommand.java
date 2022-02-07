@@ -6,13 +6,12 @@ import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.stat.Stat;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
-import playtime.meter.Main;
+import playtime.meter.ClientMain;
 import playtime.meter.util.StatParser;
 import playtime.meter.util.chat.command_args.FileArgumentType;
 
@@ -31,7 +30,7 @@ public final class PlaytimeSaveFolderCommand {
         dispatcher.register(ClientCommandManager.literal("playtime:savefolder")
                 .then(ClientCommandManager.literal("get").executes(context -> {
                     context.getSource().sendFeedback(new TranslatableText("playtimer.command.playtime.savefolder" +
-                            ".get.successful", Main.getPlaytimeMeter().getSaveFolder()));
+                            ".get.successful", ClientMain.getPlaytimeMeter().getSaveFile()));
                     return 1;
                 })).then(ClientCommandManager.literal("overwrite").then(ClientCommandManager.argument(
                         "folder", FileArgumentType.runDirectory())
@@ -39,7 +38,7 @@ public final class PlaytimeSaveFolderCommand {
                 .then(ClientCommandManager.literal("set").then(ClientCommandManager.argument("folder",
                         FileArgumentType.runDirectory()).executes(context -> {
                     int ret = setFolder(context);
-                    Main.getPlaytimeMeter().load();
+                    ClientMain.getPlaytimeMeter().load();
                     return ret;
                 }))).then(ClientCommandManager.literal("append").then(ClientCommandManager.argument("folder",
                         FileArgumentType.runDirectory()).executes(context -> {
@@ -49,14 +48,14 @@ public final class PlaytimeSaveFolderCommand {
                         return i.get();
                     }
 
-                    Object2LongMap<Stat<Identifier>> playtimes = StatParser.parsePlaytimesFileClient(
-                            Main.getPlaytimeMeter().getSaveFolder().resolve("playtimes.json"), (e) -> {
+                    Object2LongMap<Stat<Identifier>> playtimes = StatParser.parsePlaytimesFile(
+                            ClientMain.getPlaytimeMeter().getSaveFile(), (e) -> {
                                 if (e instanceof InvalidIdentifierException) {
                                     context.getSource().sendError(new LiteralText(e.getMessage()));
                                 } else if (e instanceof NoSuchFileException) {
                                     context.getSource().sendError(new TranslatableText(
                                             "command.playtimer.savefolder.append.noSuchFile",
-                                            Main.getPlaytimeMeter().getSaveFolder().resolve("playtimes.json")));
+                                            ClientMain.getPlaytimeMeter().getSaveFile().resolve("playtimes.json")));
                                     i.set(0);
                                 } else if (e instanceof JsonParseException || e instanceof IOException) {
                                     context.getSource().sendError(new TranslatableText(
@@ -68,8 +67,7 @@ public final class PlaytimeSaveFolderCommand {
 
                     if (i.get() == 1) {
                         for (Object2LongMap.Entry<Stat<Identifier>> entry : playtimes.object2LongEntrySet()) {
-                            Main.getPlaytimeMeter().increaseStat(MinecraftClient.getInstance().player, entry.getKey(),
-                                    entry.getLongValue());
+                            ClientMain.getPlaytimeMeter().increaseStat(entry.getKey(), entry.getLongValue());
                         }
                     }
 
@@ -78,7 +76,7 @@ public final class PlaytimeSaveFolderCommand {
     }
 
     private static int setFolder(CommandContext<FabricClientCommandSource> context) {
-        Path oldFolder = Main.getPlaytimeMeter().getSaveFolder();
+        Path oldFolder = ClientMain.getSaveFolder();
         Path newFolder = FileArgumentType.getPath(context, "folder");
 
         if (oldFolder.equals(newFolder)) {
@@ -89,14 +87,15 @@ public final class PlaytimeSaveFolderCommand {
 
         try {
             Files.createDirectories(newFolder);
-            Main.getPlaytimeMeter().setSaveFolder(newFolder);
-            context.getSource().sendFeedback(new TranslatableText(
-                    "command.playtimer.savefolder.set.successful", oldFolder, newFolder));
-            return 1;
         } catch (IOException e) {
             context.getSource().sendError(new TranslatableText("command.playtimer.savefolder.set.iOException"));
             e.printStackTrace();
             return -1;
         }
+
+        ClientMain.setSaveFolder(newFolder);
+        context.getSource().sendFeedback(new TranslatableText(
+                "command.playtimer.savefolder.set.successful", oldFolder, newFolder));
+        return 1;
     }
 }

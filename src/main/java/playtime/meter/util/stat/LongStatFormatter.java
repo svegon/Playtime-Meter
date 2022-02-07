@@ -4,6 +4,7 @@ import net.minecraft.stat.StatFormatter;
 
 import java.text.NumberFormat;
 
+@FunctionalInterface
 public interface LongStatFormatter {
     LongStatFormatter DEFAULT = new LongStatFormatter() {
         final NumberFormat intFormat = NumberFormat.getIntegerInstance();
@@ -64,10 +65,10 @@ public interface LongStatFormatter {
     String format(long longStat);
 
     static LongStatFormatter fromNormal(final StatFormatter intFormatter) {
-        if (intFormatter == StatFormatter.DEFAULT) {
-            return LongStatFormatter.DEFAULT;
-        } else if (intFormatter == StatFormatter.TIME) {
+        if (intFormatter == StatFormatter.TIME) {
             return LongStatFormatter.TIME;
+        } else if (intFormatter == StatFormatter.DEFAULT) {
+            return LongStatFormatter.DEFAULT;
         } else if (intFormatter == StatFormatter.DISTANCE) {
             return LongStatFormatter.DISTANCE;
         } else if (intFormatter == StatFormatter.DIVIDE_BY_TEN) {
