@@ -1,11 +1,13 @@
 package playtime.meter.mixinterfaces;
 
-import net.fabricmc.fabric.api.event.Event;
+import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.util.math.Vec3d;
-import playtime.meter.util.events.network.C2SPlayPacketListener;
-import playtime.meter.util.events.network.S2CPlayPacketListener;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public interface IServerPlayNetworkHandler {
+    void applyReceivedPacket(Packet<ServerPlayPacketListener> packet, CallbackInfo info);
+
     int ticks();
 
     Vec3d lastTickPos();

@@ -31,17 +31,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements IS
     }
 
     @Unique
-    private @NotNull ServerPlaytimeMeter playtimeMeter;
+    private ServerPlaytimeMeter playtimeMeter;
     @Unique
     private Event<C2SPlayPacketListener> packetReceivedEvent;
     @Unique
     private Event<S2CPlayPacketListener> packetSentEvent;
 
     @Inject(at = {@At("RETURN")}, method = {"<init>"})
-    @SuppressWarnings("unchecked")
     private void init(MinecraftServer server, ServerWorld world, GameProfile profile, CallbackInfo info) {
-        packetSentEvent =
-                EventFactory.createArrayBacked(S2CPlayPacketListener.class,
+        packetSentEvent = EventFactory.createArrayBacked(S2CPlayPacketListener.class,
                         listeners -> new S2CPlayPacketListener() {
                             @Override
                             public void apply(Packet<ClientPlayPacketListener> packet, CallbackInfo info) {
@@ -54,8 +52,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements IS
                                 }
                             }
                         });
-        packetReceivedEvent =
-                EventFactory.createArrayBacked(C2SPlayPacketListener.class,
+        packetReceivedEvent = EventFactory.createArrayBacked(C2SPlayPacketListener.class,
                         listeners -> new C2SPlayPacketListener() {
                             @Override
                             public void apply(Packet<ServerPlayPacketListener> packet, CallbackInfo info) {
@@ -68,8 +65,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements IS
                                 }
                             }
                         });
-        playtimeMeter = new ServerPlaytimeMeter(Main.MOD_DIRECTORY.resolve("playtimes").resolve(getUuidAsString()
-                + ".json"), (ServerPlayerEntity) (Object) this);
+        playtimeMeter = new ServerPlaytimeMeter(Main.MOD_DIRECTORY.resolve("playtimes").resolve("players")
+                .resolve(getUuidAsString() + ".json"), (ServerPlayerEntity) (Object) this);
     }
 
     @Inject(at = {@At("RETURN")}, method = {"tick"})

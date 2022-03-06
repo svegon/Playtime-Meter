@@ -45,7 +45,6 @@ public final class PlaytimeStats {
     }
 
     private static <T> StatType<T> registerType(String id, Registry<T> registry) {
-        return Registry.register(Registry.STAT_TYPE, Main.modIdentifier(id),
-                new StatType<>(registry));
+        return Registry.register(Registry.STAT_TYPE, Main.modIdentifier(id), new StatType<>(registry));
     }
 }

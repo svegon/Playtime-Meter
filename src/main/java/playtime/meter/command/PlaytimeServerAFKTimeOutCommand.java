@@ -1,5 +1,6 @@
 package playtime.meter.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -9,19 +10,22 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import playtime.meter.ServerMain;
 
-public final class PlaytimeServerAFKTimeOutCommand {
+import java.util.function.Predicate;
+
+public final class PlaytimeServerAFKTimeOutCommand implements Command<ServerCommandSource>,
+        Predicate<ServerCommandSource> {
+    private static final PlaytimeServerAFKTimeOutCommand INSTANCE = new PlaytimeServerAFKTimeOutCommand();
+
     private PlaytimeServerAFKTimeOutCommand() {
-        throw new UnsupportedOperationException();
     }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
         dispatcher.register(CommandManager.literal("playtime:serverafktimeout")
-                .then(CommandManager.argument("time", TimeArgumentType.time())
-                        .requires(source -> source.hasPermissionLevel(3))
-                        .executes(PlaytimeServerAFKTimeOutCommand::execute)));
+                .then(CommandManager.argument("time", TimeArgumentType.time()).requires(INSTANCE)
+                        .executes(INSTANCE)));
     }
 
-    private static int execute(final CommandContext<ServerCommandSource> context) {
+    public int run(final CommandContext<ServerCommandSource> context) {
         int ticks = IntegerArgumentType.getInteger(context, "times");
         int prev = ServerMain.getSettings().setAFKTimeout(ticks);
 
@@ -34,5 +38,10 @@ public final class PlaytimeServerAFKTimeOutCommand {
         }
 
         return ticks;
+    }
+
+    @Override
+    public boolean test(ServerCommandSource source) {
+        return source.hasPermissionLevel(3);
     }
 }

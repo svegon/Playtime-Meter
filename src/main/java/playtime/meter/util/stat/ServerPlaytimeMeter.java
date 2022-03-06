@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import playtime.meter.Main;
 import playtime.meter.PlaytimeStats;
 import playtime.meter.ServerMain;
 import playtime.meter.mixin.ServerPlayerInteractionManagerAccessor;
@@ -30,6 +31,11 @@ public final class ServerPlaytimeMeter extends PlaytimeMeter implements C2SPlayP
         this.player = player;
 
         ((IServerPlayerEntity) player).packetReceivedEvent().register(this);
+    }
+
+    @Override
+    public void setSaveFile(Path path) {
+        throw new UnsupportedOperationException();
     }
 
     public void tick() {
@@ -77,6 +83,8 @@ public final class ServerPlaytimeMeter extends PlaytimeMeter implements C2SPlayP
 
     @Override
     public void apply(Packet<ServerPlayPacketListener> packet, CallbackInfo info) {
+        Main.LOGGER.error(packet.getClass());
+
         if (!(packet instanceof KeepAliveC2SPacket || packet instanceof CustomPayloadC2SPacket)) {
             afkTicks = 0;
         }

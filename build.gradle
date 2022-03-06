@@ -1,6 +1,6 @@
 buildscript {
 	ext.minecraftVersion = project.minecraft_version_1_18
-	ext.minFabric = fabric_version_1_16
+	ext.minFabric = fabric_version_1_17
 	ext.javaVersionShort = 17
 
 	if (minecraftVersion.startsWith("1.14")) {

@@ -1,5 +1,6 @@
 package playtime.meter.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,26 +15,36 @@ import playtime.meter.gui.PlaytimeStatsWidget;
 import playtime.meter.mixinterfaces.IServerPlayerEntity;
 import playtime.meter.util.stat.PlaytimeMeter;
 
-public final class PlaytimeViewStatsCommand {
+import java.util.function.Predicate;
+
+public final class PlaytimeViewStatsCommand implements Command<ServerCommandSource>, Predicate<ServerCommandSource> {
+    private static final PlaytimeViewStatsCommand INSTANCE = new PlaytimeViewStatsCommand();
+
     private PlaytimeViewStatsCommand() {
-        throw new UnsupportedOperationException();
+
     }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
-        dispatcher.register(CommandManager.literal("playtime:viewstats")
-                .requires(source -> source.getEntity() instanceof ServerPlayerEntity)
-                .executes(PlaytimeViewStatsCommand::execute));
+        dispatcher.register(CommandManager.literal("playtime:viewstats").requires(INSTANCE).executes(INSTANCE));
     }
 
-    private static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    @Override
+    public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
         PlaytimeMeter meter = ((IServerPlayerEntity) player).getPlaytimeMeter();
+        int i = 0;
 
         for (Stat<Identifier> stat : PlaytimeStats.PLAYTIME) {
             context.getSource().sendFeedback(new TranslatableText(PlaytimeStatsWidget.getStatTranslationKey(stat))
-                    .append(":\t\t\t\t").append(meter.format(stat)), false);
+                    .append(": ").append(meter.format(stat)), false);
+            i++;
         }
 
-        return PlaytimeStats.PLAYTIME_STATS.size();
+        return i;
+    }
+
+    @Override
+    public boolean test(ServerCommandSource source) {
+        return source.getEntity() instanceof ServerPlayerEntity;
     }
 }

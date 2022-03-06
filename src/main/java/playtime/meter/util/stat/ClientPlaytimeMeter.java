@@ -45,7 +45,7 @@ public class ClientPlaytimeMeter extends PlaytimeMeter implements ClientTickEven
         increaseStat(PlaytimeStats.TOTAL, 1);
 
         if (player == null || (screen != null
-                && screen.isPauseScreen() && minecraftClient.isInSingleplayer())) {
+                && screen.shouldPause() && minecraftClient.isInSingleplayer())) {
             increaseStat(PlaytimeStats.SCREEN_TIME, 1);
 
             if (screen instanceof TitleScreen) {
