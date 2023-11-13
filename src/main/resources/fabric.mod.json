@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "${modid}",
+  "version": "${version}",
+
+  "name": "Playtime Meter",
+  "description": "Measures the time you spend playing Minecraft.",
+  "authors": [
+    "Svegon"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/playtime-meter",
+    "sources": "https://github.com/svegon/Playtime-Meter",
+    "issues": "https://github.com/svegon/Playtime-Meter/issues"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/${modid}/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "${group}.Main"
+    ], "client": [
+      "${group}.Main"
+    ], "server": [
+      "${group}.Main"
+    ], "preLaunch": [
+      "${group}.Main"
+    ]
+  },
+  "mixins": [
+    "playtimer.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": ">=${min_fabric_version}",
+    "minecraft": [
+      "1.19.x",
+      ">=${minecraft_version}"
+    ],
+    "java": ">=${java_version_short}"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

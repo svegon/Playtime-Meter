@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "playtime.meter.mixin",
+  "compatibilityLevel": "JAVA_18",
+  "mixins": [
+    "NetworkThreadUtilsMixin",
+    "PlayerManagerMixin",
+    "ServerPlayerEntityMixin",
+    "ServerPlayerInteractionManagerAccessor",
+    "ServerPlayNetworkHandlerMixin",
+    "StatAccessor"
+  ],
+  "client": [
+    "ClientPlayerInteractionManagerAccessor",
+    "KeyBindingMixin",
+    "MinecraftClientAccessor",
+    "StatsScreenMixin"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
