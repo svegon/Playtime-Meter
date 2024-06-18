@@ -1,3 +1,3 @@
 # Playtime-Meter
  
-Run scripts/genSources-eclipse.cmd if you want to read the source code
+Minecraft mod for measuring the time you take doing various activities
