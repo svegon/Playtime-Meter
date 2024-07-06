@@ -14,10 +14,10 @@
     "issues": "https://github.com/svegon/Playtime-Meter/issues"
   },
 
-  "license": "CC0-1.0",
+  "license": "GPL-3.0",
   "icon": "assets/${modid}/icon.png",
 
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "${group}.Main"
@@ -29,21 +29,14 @@
       "${group}.Main"
     ]
   },
-  "mixins": [
-    "playtimer.mixins.json"
-  ],
+
+      "mixins": [
+        "${modid}.mixins.json"
+      ],
 
   "depends": {
     "fabricloader": ">=${loader_version}",
-    "fabric": ">=${min_fabric_version}",
-    "minecraft": ["1.16.x",
-      "1.17.x",
-      "1.18.x",
-      ">=${minecraft_version}"
-    ],
-    "java": ">=${java_version_short}"
-  },
-  "suggests": {
-    "another-mod": "*"
+        "fabric": ">=${min_fabric_version}",
+    "minecraft": ">=${minecraft_version}"
   }
 }

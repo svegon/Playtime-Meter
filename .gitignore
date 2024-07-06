@@ -9,7 +9,7 @@ classes/
 
 *.launch
 
-# idea
+# JetBrains
 
 .idea/
 *.iml
